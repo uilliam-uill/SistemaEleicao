@@ -17,6 +17,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
@@ -354,232 +359,289 @@ public class Cadastrro extends JDialog {
 			@SuppressWarnings("null")
 			public void actionPerformed(ActionEvent e) {
 
-				String itemSelecionado = comboBox.getSelectedItem().toString();
-				String getNome = txtNome.getText();
-				String getCpf = txtdCpf.getText();
-				String getEmail = txtEmail.getText();
-				String getTitulo = txtTitulo.getText();
-				String perfilE = "eleitor";
-				String getCidade = txtCidade.getText();
-				String getCep = txtCep.getText();
-				String getBairro = txtBairro.getText();
-				String getNumero = txtNumeroEnd.getText();
-				String getLogradouro = txtLogradouro.getText();
-				String getEstado = txtEstado.getText();
-				String getPartido = txtPartido.getText();
+			String itemSelecionado = comboBox.getSelectedItem().toString();
+			String getNome = txtNome.getText();
+			String getCpf = txtdCpf.getText();
+			String getEmail = txtEmail.getText();
+			String getTitulo = txtTitulo.getText();
+			String perfilE = "eleitor";
+			String getCidade = txtCidade.getText();
+			String getCep = txtCep.getText();
+			String getBairro = txtBairro.getText();
+			String getNumero = txtNumeroEnd.getText();
+			String getLogradouro = txtLogradouro.getText();
+			String getEstado = txtEstado.getText();
+			String getPartido = txtPartido.getText();
 
-				int getNumPartido = 0;
-				if (!txtNumeroPartido.getText().isEmpty()) {
-					getNumPartido = Integer.parseInt(txtNumeroPartido.getText());
-				}
-				int getNumCandidato = 0;
-				if (!txtNumCandidato.getText().isEmpty()) {
-					getNumCandidato = Integer.parseInt(txtNumCandidato.getText());
-				}
-				String txtFotos = txtFoto.getText();
-				String Ssenha = new String(txtSenha.getPassword());
-				String CSenha = new String(txtConfirmeSenha.getPassword());
-				String perfilSelecionado = txtPerfilAdmin.getSelectedItem().toString();
-
-				Connection conn = null;
-				ResultSet rs = null;
-				PreparedStatement st = null;
-
-				if (itemSelecionado.equals("ELEITOR")) {
-
-					if (txtNome.getText().isEmpty() || txtdCpf.getText().isEmpty() || txtEmail.getText().isEmpty()
-							|| txtTitulo.getText().isEmpty() || txtSenha.getPassword().length == 0
-							|| txtConfirmeSenha.getPassword().length == 0 || txtCidade.getText().isEmpty()
-							|| txtBairro.getText().isEmpty() || txtCep.getText().isEmpty()
-							|| txtEstado.getText().isEmpty() || txtLogradouro.getText().isEmpty()
-							|| txtNumeroEnd.getText().isEmpty()) {
-
-						JOptionPane.showMessageDialog(null, "Preencha todos os campos");
-
-					} else if (Ssenha.equals(CSenha)) {
-
-						try {
-
-							conn = DB.getConnection();
-
-							st = conn.prepareStatement(
-									"INSERT INTO pessoa (nome, cpf, titulo, email, senha, perfil, candidatoElietor)"
-											+ "VALUES (?,?,?,?,?,?,?) ",
-									Statement.RETURN_GENERATED_KEYS);
-
-							st.setString(1, getNome);
-							st.setString(2, getCpf);
-							st.setString(3, getTitulo);
-							st.setString(4, getEmail);
-							st.setString(5, CSenha);
-							st.setString(6, perfilSelecionado);
-							st.setString(7, perfilE);
-							st.execute();
-
-							rs = st.getGeneratedKeys();
-							int pessoaId = -1;
-							if (rs.next()) {
-								pessoaId = rs.getInt(1);
-							}
-
-							st = conn.prepareStatement(
-									"Insert into endereco (cidade, cep, bairro, numero, logradouro, pessoa_id, estado)"
-											+ "values (?,?,?,?,?,?,?) ");
-
-							st.setString(1, getCidade);
-							st.setString(2, getCep);
-							st.setString(3, getBairro);
-							st.setString(4, getNumero);
-							st.setString(5, getLogradouro);
-							st.setInt(6, pessoaId);
-							st.setString(7, getEstado);
-							st.execute();
-
-							txtNome.setText("");
-							txtdCpf.setText("");
-							txtTitulo.setText("");
-							txtEmail.setText("");
-							txtConfirmeSenha.setText("");
-							txtSenha.setText("");
-							txtCep.setText("");
-							txtCidade.setText("");
-							txtBairro.setText("");
-							txtLogradouro.setText("");
-							txtNumeroEnd.setText("");
-
-							JOptionPane.showMessageDialog(null, "SALVO COM SUCESSO");
-
-						} catch (SQLException e1) {
-							e1.printStackTrace();
-						}
-
-					} else {
-						JOptionPane.showMessageDialog(null, "SENHAS DIFERENTES");
-					}
-				} else if (itemSelecionado.equals("CANDIDATO")) {
-					String perfilC = "candidato";
-					if (txtNome.getText().isEmpty() || txtdCpf.getText().isEmpty() || txtEmail.getText().isEmpty()
-							|| txtTitulo.getText().isEmpty() || txtSenha.getPassword().length == 0
-							|| txtConfirmeSenha.getPassword().length == 0 || txtCidade.getText().isEmpty()
-							|| txtBairro.getText().isEmpty() || txtCep.getText().isEmpty()
-							|| txtEstado.getText().isEmpty() || txtLogradouro.getText().isEmpty()
-							|| txtNumeroEnd.getText().isEmpty()) {
-						JOptionPane.showMessageDialog(null, "Preencha todos os campos");
-					} else if (Ssenha.equals(CSenha)) {
-
-						try {
-							conn = DB.getConnection();
-
-							st = conn.prepareStatement(
-									"Insert into pessoa (nome, cpf, titulo, email, senha,perfil,candidatoElietor)"
-											+ "values (?,?,?,?,?,?,?) ",
-									Statement.RETURN_GENERATED_KEYS);
-							st.setString(1, getNome);
-							st.setString(2, getCpf);
-							st.setString(3, getTitulo);
-							st.setString(4, getEmail);
-							st.setString(5, CSenha);
-							st.setString(6, perfilSelecionado);
-							st.setString(7, perfilC);
-							st.execute();
-
-							rs = st.getGeneratedKeys();
-
-							int pessoaId = -1;
-							if (rs.next()) {
-								pessoaId = rs.getInt(1);
-							}
-							st = conn.prepareStatement(
-									"Insert into endereco (cidade, cep, bairro, numero, logradouro, pessoa_id, estado)"
-											+ "values (?,?,?,?,?,?,?) ");
-
-							st.setString(1, getCidade);
-							st.setString(2, getCep);
-							st.setString(3, getBairro);
-							st.setString(4, getNumero);
-							st.setString(5, getLogradouro);
-							st.setInt(6, pessoaId);
-							st.setString(7, getEstado);
-							st.execute();
-
-							String nomeEleicaoSelecionada = comboBoxEleicao.getSelectedItem().toString();
-							int idEleicaoSelecionada = 0;
-
-							try {
-								conn = DB.getConnection();
-
-								Statement stmtId = conn.createStatement();
-								ResultSet rsId = stmtId.executeQuery(
-										"SELECT id FROM eleicao WHERE tipo = '" + nomeEleicaoSelecionada + "'");
-								if (rsId.next()) {
-									idEleicaoSelecionada = rsId.getInt("id");
-								}
-
-							} catch (SQLException ex) {
-								ex.printStackTrace();
-							}
-
-							// inserir na tabela candidato
-							st = conn.prepareStatement(
-									"INSERT INTO candidato (partido, numeroPartido, numeroCandidato, foto, eleicao_id, pessoa_id) "
-											+ "VALUES (?, ?, ?, ?, ?, ?)",
-									Statement.RETURN_GENERATED_KEYS);
-							st.setString(1, getPartido);
-							st.setInt(2, getNumPartido);
-							st.setInt(3, getNumCandidato);
-							st.setString(4, txtFotos);
-							st.setInt(5, idEleicaoSelecionada);
-							st.setInt(6, pessoaId);
-							st.execute();
-
-							// recuperar o id gerado automaticamente na tabela candidato
-							int candidatoId = -1;
-							rs = st.getGeneratedKeys();
-							if (rs.next()) {
-								candidatoId = rs.getInt(1);
-							}
-
-							// inserir na tabela eleicao_candidato
-							st = conn.prepareStatement(
-									"INSERT INTO eleicao_candidato (eleicao_id, candidato_id) VALUES (?, ?)");
-							st.setInt(1, idEleicaoSelecionada);
-							st.setInt(2, candidatoId);
-							st.execute();
-
-							txtNome.setText("");
-							txtdCpf.setText("");
-							txtTitulo.setText("");
-							txtEmail.setText("");
-							txtConfirmeSenha.setText("");
-							txtSenha.setText("");
-							txtCep.setText("");
-							txtCidade.setText("");
-							txtBairro.setText("");
-							txtLogradouro.setText("");
-							txtNumeroEnd.setText("");
-							txtPartido.setText("");
-							txtNumeroPartido.setText("");
-							txtNumCandidato.setText("");
-							txtFoto.setText("");
-
-							JOptionPane.showMessageDialog(null, "SALVO COM SUCESSO");
-
-						} catch (SQLException ex) {
-							if (ex.getMessage().contains("cpf_unique")) {
-								JOptionPane.showMessageDialog(null, "O CPF deve ser único.");
-							} else if (ex.getMessage().contains("candidato_unique")) {
-								JOptionPane.showMessageDialog(null, "O candidato já está associado a uma eleição.");
-							} else {
-								ex.printStackTrace();
-							}
-						}
-
-					} else {
-						JOptionPane.showMessageDialog(null, "SENHAS DIFERENTES");
-					}
-				}
+			int getNumPartido = 0;
+			if (!txtNumeroPartido.getText().isEmpty()) {
+			getNumPartido = Integer.parseInt(txtNumeroPartido.getText());
 			}
-		});
+			int getNumCandidato = 0;
+			if (!txtNumCandidato.getText().isEmpty()) {
+			getNumCandidato = Integer.parseInt(txtNumCandidato.getText());
+			}
+			String txtFotos = txtFoto.getText();
+			String Ssenha = new String(txtSenha.getPassword());
+			String CSenha = new String(txtConfirmeSenha.getPassword());
+			String perfilSelecionado = txtPerfilAdmin.getSelectedItem().toString();
+
+			Connection conn = null;
+			ResultSet rs = null;
+			PreparedStatement st = null;
+
+			if (itemSelecionado.equals("ELEITOR")) {
+
+			if (txtNome.getText().isEmpty() || txtdCpf.getText().isEmpty() || txtEmail.getText().isEmpty()
+			|| txtTitulo.getText().isEmpty() || txtSenha.getPassword().length == 0
+			|| txtConfirmeSenha.getPassword().length == 0 || txtCidade.getText().isEmpty()
+			|| txtBairro.getText().isEmpty() || txtCep.getText().isEmpty()
+			|| txtEstado.getText().isEmpty() || txtLogradouro.getText().isEmpty()
+			|| txtNumeroEnd.getText().isEmpty()) {
+
+			JOptionPane.showMessageDialog(null, "Preencha todos os campos");
+
+			} else if (Ssenha.equals(CSenha)) {
+
+			try {
+
+			conn = DB.getConnection();
+
+			st = conn.prepareStatement(
+			"INSERT INTO pessoa (nome, cpf, titulo, email, senha, perfil, candidatoElietor)"
+			+ "VALUES (?,?,?,?,?,?,?) ",
+			Statement.RETURN_GENERATED_KEYS);
+
+			st.setString(1, getNome);
+			st.setString(2, getCpf);
+			st.setString(3, getTitulo);
+			st.setString(4, getEmail);
+			st.setString(5, CSenha);
+			st.setString(6, perfilSelecionado);
+			st.setString(7, perfilE);
+			st.execute();
+
+			MongoClient mongoClient = MongoClients.create("mongodb://localhost:27017");
+
+			MongoDatabase database = mongoClient.getDatabase("SistemaEleicao");
+
+			MongoCollection<Document> collection = database.getCollection("Pessoa");
+
+			Document documento = new Document();
+			documento.append("nome", getNome);
+			documento.append("cpf", getCpf);
+			documento.append("titulo", getTitulo);
+			documento.append("email", getEmail);
+			documento.append("senha", CSenha);
+			documento.append("perfil", perfilSelecionado);
+			documento.append("candidatoElietor", perfilE);
+
+			documento.append("endereco",
+			new Document().append("cidade", getCidade).append("cep", getCep)
+			.append("bairro", getBairro).append("numero", getNumero)
+			.append("logradouro", getLogradouro).append("estado", getEstado));
+
+			collection.insertOne(documento);
+
+			mongoClient.close();
+
+			rs = st.getGeneratedKeys();
+			int pessoaId = -1;
+			if (rs.next()) {
+			pessoaId = rs.getInt(1);
+			}
+
+			st = conn.prepareStatement(
+			"Insert into endereco (cidade, cep, bairro, numero, logradouro, pessoa_id, estado)"
+			+ "values (?,?,?,?,?,?,?) ");
+
+			st.setString(1, getCidade);
+			st.setString(2, getCep);
+			st.setString(3, getBairro);
+			st.setString(4, getNumero);
+			st.setString(5, getLogradouro);
+			st.setInt(6, pessoaId);
+			st.setString(7, getEstado);
+			st.execute();
+
+			txtNome.setText("");
+			txtdCpf.setText("");
+			txtTitulo.setText("");
+			txtEmail.setText("");
+			txtConfirmeSenha.setText("");
+			txtSenha.setText("");
+			txtCep.setText("");
+			txtCidade.setText("");
+			txtBairro.setText("");
+			txtLogradouro.setText("");
+			txtNumeroEnd.setText("");
+
+			JOptionPane.showMessageDialog(null, "SALVO COM SUCESSO");
+
+			} catch (SQLException e1) {
+			e1.printStackTrace();
+			}
+
+			} else {
+			JOptionPane.showMessageDialog(null, "SENHAS DIFERENTES");
+			}
+			} else if (itemSelecionado.equals("CANDIDATO")) {
+			String perfilC = "candidato";
+			if (txtNome.getText().isEmpty() || txtdCpf.getText().isEmpty() || txtEmail.getText().isEmpty()
+			|| txtTitulo.getText().isEmpty() || txtSenha.getPassword().length == 0
+			|| txtConfirmeSenha.getPassword().length == 0 || txtCidade.getText().isEmpty()
+			|| txtBairro.getText().isEmpty() || txtCep.getText().isEmpty()
+			|| txtEstado.getText().isEmpty() || txtLogradouro.getText().isEmpty()
+			|| txtNumeroEnd.getText().isEmpty()) {
+			JOptionPane.showMessageDialog(null, "Preencha todos os campos");
+			} else if (Ssenha.equals(CSenha)) {
+
+			try {
+			conn = DB.getConnection();
+
+			st = conn.prepareStatement(
+			"Insert into pessoa (nome, cpf, titulo, email, senha,perfil,candidatoElietor)"
+			+ "values (?,?,?,?,?,?,?) ",
+			Statement.RETURN_GENERATED_KEYS);
+			st.setString(1, getNome);
+			st.setString(2, getCpf);
+			st.setString(3, getTitulo);
+			st.setString(4, getEmail);
+			st.setString(5, CSenha);
+			st.setString(6, perfilSelecionado);
+			st.setString(7, perfilC);
+			st.execute();
+
+			rs = st.getGeneratedKeys();
+
+			int pessoaId = -1;
+			if (rs.next()) {
+			pessoaId = rs.getInt(1);
+			}
+			st = conn.prepareStatement(
+			"Insert into endereco (cidade, cep, bairro, numero, logradouro, pessoa_id, estado)"
+			+ "values (?,?,?,?,?,?,?) ");
+
+			st.setString(1, getCidade);
+			st.setString(2, getCep);
+			st.setString(3, getBairro);
+			st.setString(4, getNumero);
+			st.setString(5, getLogradouro);
+			st.setInt(6, pessoaId);
+			st.setString(7, getEstado);
+			st.execute();
+
+			String nomeEleicaoSelecionada = comboBoxEleicao.getSelectedItem().toString();
+			int idEleicaoSelecionada = 0;
+
+			try {
+			conn = DB.getConnection();
+
+			Statement stmtId = conn.createStatement();
+			ResultSet rsId = stmtId.executeQuery(
+			"SELECT id FROM eleicao WHERE tipo = '" + nomeEleicaoSelecionada + "'");
+			if (rsId.next()) {
+			idEleicaoSelecionada = rsId.getInt("id");
+			}
+
+			} catch (SQLException ex) {
+			ex.printStackTrace();
+			}
+
+			// inserir na tabela candidato
+			st = conn.prepareStatement(
+			"INSERT INTO candidato (partido, numeroPartido, numeroCandidato, foto, eleicao_id, pessoa_id) "
+			+ "VALUES (?, ?, ?, ?, ?, ?)",
+			Statement.RETURN_GENERATED_KEYS);
+			st.setString(1, getPartido);
+			st.setInt(2, getNumPartido);
+			st.setInt(3, getNumCandidato);
+			st.setString(4, txtFotos);
+			st.setInt(5, idEleicaoSelecionada);
+			st.setInt(6, pessoaId);
+			st.execute();
+
+			// recuperar o id gerado automaticamente na tabela candidato
+			int candidatoId = -1;
+			rs = st.getGeneratedKeys();
+			if (rs.next()) {
+			candidatoId = rs.getInt(1);
+			}
+
+			// inserir na tabela eleicao_candidato
+			st = conn.prepareStatement(
+			"INSERT INTO eleicao_candidato (eleicao_id, candidato_id) VALUES (?, ?)");
+			st.setInt(1, idEleicaoSelecionada);
+			st.setInt(2, candidatoId);
+			st.execute();
+
+			MongoClient mongoClient = MongoClients.create("mongodb://localhost:27017");
+
+			MongoDatabase database = mongoClient.getDatabase("SistemaEleicao");
+
+			MongoCollection<Document> collection = database.getCollection("documentoCandidato");
+
+			Document documentoCandidato = new Document();
+			documentoCandidato.append("nome", getNome);
+			documentoCandidato.append("cpf", getCpf);
+			documentoCandidato.append("titulo", getTitulo);
+			documentoCandidato.append("email", getEmail);
+			documentoCandidato.append("senha", CSenha);
+			documentoCandidato.append("perfil", perfilSelecionado);
+			documentoCandidato.append("candidatoElietor", perfilC);
+
+			documentoCandidato.append("endereco",
+			new Document().append("cidade", getCidade).append("cep", getCep)
+			.append("bairro", getBairro).append("numero", getNumero)
+			.append("logradouro", getLogradouro).append("estado", getEstado));
+
+			documentoCandidato.append("eleicao",
+			new Document().append("nomeEleicao", nomeEleicaoSelecionada));
+
+			documentoCandidato.append("candidato",
+			new Document().append("partido", getPartido).append("numeroPartido", getNumPartido)
+			.append("numeroCandidato", getNumCandidato).append("foto", txtFotos)
+			.append("eleicao_id", idEleicaoSelecionada).append("pessoa_id", pessoaId));
+
+			collection.insertOne(documentoCandidato);
+
+			mongoClient.close();
+
+			txtNome.setText("");
+			txtdCpf.setText("");
+			txtTitulo.setText("");
+			txtEmail.setText("");
+			txtConfirmeSenha.setText("");
+			txtSenha.setText("");
+			txtCep.setText("");
+			txtCidade.setText("");
+			txtBairro.setText("");
+			txtLogradouro.setText("");
+			txtNumeroEnd.setText("");
+			txtPartido.setText("");
+			txtNumeroPartido.setText("");
+			txtNumCandidato.setText("");
+			txtFoto.setText("");
+
+			JOptionPane.showMessageDialog(null, "SALVO COM SUCESSO");
+
+			} catch (SQLException ex) {
+			if (ex.getMessage().contains("cpf_unique")) {
+			JOptionPane.showMessageDialog(null, "O CPF deve ser Ãºnico.");
+			} else if (ex.getMessage().contains("candidato_unique")) {
+			JOptionPane.showMessageDialog(null, "O candidato jÃ¡ estÃ¡ associado a uma eleiÃ§Ã£o.");
+			} else {
+			ex.printStackTrace();
+			}
+			}
+
+			} else {
+			JOptionPane.showMessageDialog(null, "SENHAS DIFERENTES");
+			}
+			}
+			}
+			});
+
 		btnNewButton.setIcon(new ImageIcon(Cadastrro.class.getResource("/view/images/salve.png")));
 		panelCadastro.add(lblNewLabel_6);
 		panelCadastro.add(lblNewLabel_4);
@@ -639,12 +701,12 @@ public class Cadastrro extends JDialog {
 		panelEleicaoo.setBackground(rgbcolor);
 		panel_3.add(panelEleicaoo, "name_4758241682554900");
 
-		JLabel lblNewLabel_13 = new JLabel("Eleição");
+		JLabel lblNewLabel_13 = new JLabel("Eleiï¿½ï¿½o");
 		lblNewLabel_13.setBounds(287, 15, 120, 48);
 		lblNewLabel_13.setForeground(new Color(255, 255, 255));
 		lblNewLabel_13.setFont(new Font("Segoe UI Black", Font.PLAIN, 35));
 
-		JLabel lblNewLabel_14 = new JLabel("Nome da Eleição:");
+		JLabel lblNewLabel_14 = new JLabel("Nome da Eleiï¿½ï¿½o:");
 		lblNewLabel_14.setBounds(124, 125, 94, 15);
 		lblNewLabel_14.setForeground(new Color(255, 255, 255));
 		lblNewLabel_14.setFont(new Font("Tahoma", Font.PLAIN, 12));
@@ -653,7 +715,7 @@ public class Cadastrro extends JDialog {
 		txtNomeEleicao.setBounds(123, 145, 169, 29);
 		txtNomeEleicao.setColumns(10);
 
-		JLabel lblNewLabel_15 = new JLabel("Tipo de Eleição:");
+		JLabel lblNewLabel_15 = new JLabel("Tipo de Eleiï¿½ï¿½o:");
 		lblNewLabel_15.setBounds(123, 181, 104, 15);
 		lblNewLabel_15.setForeground(new Color(255, 255, 255));
 		lblNewLabel_15.setFont(new Font("Tahoma", Font.PLAIN, 12));
@@ -718,7 +780,7 @@ public class Cadastrro extends JDialog {
 						/*
 						 * if (dataInicio.before(dataAtual) || dataFinal.before(dataAtual)) {
 						 * JOptionPane.showMessageDialog(null,
-						 * "As datas não podem ser anteriores à data atual."); }
+						 * "As datas nï¿½o podem ser anteriores ï¿½ data atual."); }
 						 */
 
 						st = conn.prepareStatement(
@@ -765,7 +827,7 @@ public class Cadastrro extends JDialog {
 					} catch (SQLException e1) {
 						e1.printStackTrace();
 					} catch (ParseException e1) {
-						JOptionPane.showMessageDialog(null, "Data inválida. Informe a data no formato yyyy/MM/dd.");
+						JOptionPane.showMessageDialog(null, "Data invï¿½lida. Informe a data no formato yyyy/MM/dd.");
 						e1.printStackTrace();
 					}
 				}
@@ -1166,7 +1228,7 @@ public class Cadastrro extends JDialog {
 			}
 		});
 		tableAdmin.setModel(new DefaultTableModel(new Object[][] {},
-				new String[] { "Id", "Nome", "Cpf", "Titulo", "Email", "Senha", "Perfil", "Informação" }));
+				new String[] { "Id", "Nome", "Cpf", "Titulo", "Email", "Senha", "Perfil", "Informaï¿½ï¿½o" }));
 		scrollPane.setViewportView(tableAdmin);
 
 		JComboBox comboBoxInfoCandidatoCrud = new JComboBox();
@@ -1272,13 +1334,13 @@ public class Cadastrro extends JDialog {
 					panelCrudEleicao.setVisible(false);
 					panelCrudEndereco.setVisible(false);
 					panelCrudChapa.setVisible(false);
-				} else if (itemSelecionadoCombox.equals("Eleição")) {
+				} else if (itemSelecionadoCombox.equals("Eleiï¿½ï¿½o")) {
 					panelCrudEleicao.setVisible(true);
 					panelCrudCandidato.setVisible(false);
 					panelCrudUsuario.setVisible(false);
 					panelCrudEndereco.setVisible(false);
 					panelCrudChapa.setVisible(false);
-				} else if (itemSelecionadoCombox.equals("Endereço")) {
+				} else if (itemSelecionadoCombox.equals("Endereï¿½o")) {
 					panelCrudEndereco.setVisible(true);
 					panelCrudEleicao.setVisible(false);
 					panelCrudCandidato.setVisible(false);
@@ -1347,7 +1409,7 @@ public class Cadastrro extends JDialog {
 								st.executeUpdate();
 
 								((DefaultTableModel) tableAdmin.getModel()).removeRow(row);
-								JOptionPane.showMessageDialog(null, "Candidato excluído com sucesso");
+								JOptionPane.showMessageDialog(null, "Candidato excluï¿½do com sucesso");
 
 							}
 						}
@@ -1395,7 +1457,7 @@ public class Cadastrro extends JDialog {
 								st.setInt(1, id);
 								st.executeUpdate();
 
-								JOptionPane.showMessageDialog(null, "Candidato excluído com sucesso");
+								JOptionPane.showMessageDialog(null, "Candidato excluï¿½do com sucesso");
 
 								((DefaultTableModel) tableAdmin.getModel()).removeRow(row);
 
@@ -1408,7 +1470,7 @@ public class Cadastrro extends JDialog {
 					}
 				}
 
-				else if (itemSelecionadoCombox.equals("Eleição")) {
+				else if (itemSelecionadoCombox.equals("Eleiï¿½ï¿½o")) {
 					try {
 						if (row == -1) {
 							JOptionPane.showMessageDialog(null, "Selecione a linha que deseja excluir");
@@ -1420,7 +1482,7 @@ public class Cadastrro extends JDialog {
 
 								conn = DB.getConnection();
 
-								// Excluir as referências na tabela "eleicao_candidato"
+								// Excluir as referï¿½ncias na tabela "eleicao_candidato"
 								st = conn.prepareStatement("DELETE FROM eleicao_candidato WHERE eleicao_id = ?");
 								st.setInt(1, id);
 								st.executeUpdate();
@@ -1446,7 +1508,7 @@ public class Cadastrro extends JDialog {
 								st.setInt(1, id);
 								st.executeUpdate();
 								((DefaultTableModel) tableAdmin.getModel()).removeRow(row);
-								JOptionPane.showMessageDialog(null, "Candidato excluído com sucesso");
+								JOptionPane.showMessageDialog(null, "Candidato excluï¿½do com sucesso");
 							}
 						}
 					} catch (SQLException ex) {
@@ -1456,7 +1518,7 @@ public class Cadastrro extends JDialog {
 					}
 				}
 
-				else if (itemSelecionadoCombox.equals("Endereço")) {
+				else if (itemSelecionadoCombox.equals("Endereï¿½o")) {
 					try {
 						if (row == -1) {
 							JOptionPane.showMessageDialog(null, "Selecione a linha que deseja excluir");
@@ -1473,7 +1535,7 @@ public class Cadastrro extends JDialog {
 								st.executeUpdate();
 
 								((DefaultTableModel) tableAdmin.getModel()).removeRow(row);
-								JOptionPane.showMessageDialog(null, "Candidato excluído com sucesso");
+								JOptionPane.showMessageDialog(null, "Candidato excluï¿½do com sucesso");
 							}
 						}
 
@@ -1505,7 +1567,7 @@ public class Cadastrro extends JDialog {
 								st.executeUpdate();
 
 								((DefaultTableModel) tableAdmin.getModel()).removeRow(row);
-								JOptionPane.showMessageDialog(null, "Candidato excluído com sucesso");
+								JOptionPane.showMessageDialog(null, "Candidato excluï¿½do com sucesso");
 							}
 						}
 
@@ -1557,7 +1619,7 @@ public class Cadastrro extends JDialog {
 						tabelaUsuario.addColumn("Email");
 						tabelaUsuario.addColumn("Senha");
 						tabelaUsuario.addColumn("Perfil");
-						tabelaUsuario.addColumn("Informação");
+						tabelaUsuario.addColumn("Informaï¿½ï¿½o");
 
 						while (rs.next()) {
 							int id = rs.getInt("id");
@@ -1591,11 +1653,11 @@ public class Cadastrro extends JDialog {
 						tabelaCandidato.addColumn("Email");
 						tabelaCandidato.addColumn("Senha");
 						tabelaCandidato.addColumn("Perfil");
-						tabelaCandidato.addColumn("Informação");
+						tabelaCandidato.addColumn("Informaï¿½ï¿½o");
 						tabelaCandidato.addColumn("Partido");
-						tabelaCandidato.addColumn("Número do Partido");
-						tabelaCandidato.addColumn("Número do Candidato");
-						tabelaCandidato.addColumn("Eleição");
+						tabelaCandidato.addColumn("Nï¿½mero do Partido");
+						tabelaCandidato.addColumn("Nï¿½mero do Candidato");
+						tabelaCandidato.addColumn("Eleiï¿½ï¿½o");
 						tabelaCandidato.addColumn("Foto");
 
 						while (rs.next()) {
@@ -1619,7 +1681,7 @@ public class Cadastrro extends JDialog {
 
 						}
 
-					} else if (itemSelecionadoCombox.equals("Eleição")) {
+					} else if (itemSelecionadoCombox.equals("Eleiï¿½ï¿½o")) {
 						st = conn.createStatement();
 
 						rs = st.executeQuery("SELECT * FROM eleicao");
@@ -1645,7 +1707,7 @@ public class Cadastrro extends JDialog {
 						}
 					}
 
-					else if (itemSelecionadoCombox.equals("Endereço")) {
+					else if (itemSelecionadoCombox.equals("Endereï¿½o")) {
 						st = conn.createStatement();
 
 						rs = st.executeQuery("SELECT endereco.*, pessoa.nome, pessoa.cpf " + "FROM endereco "
@@ -1688,7 +1750,7 @@ public class Cadastrro extends JDialog {
 						tabelaChapa.setColumnCount(0);
 						tabelaChapa.addColumn("Id");
 						tabelaChapa.addColumn("Nome");
-						tabelaChapa.addColumn("Descrição");
+						tabelaChapa.addColumn("Descriï¿½ï¿½o");
 
 						while (rs.next()) {
 							int id = rs.getInt("id");
@@ -1867,7 +1929,7 @@ public class Cadastrro extends JDialog {
 						ex.printStackTrace();
 					}
 
-				} else if (itemSelecionadoCombox.equals("Eleição")) {
+				} else if (itemSelecionadoCombox.equals("Eleiï¿½ï¿½o")) {
 					try {
 						if (textFieldCrudNomeEleicao.getText().isEmpty()
 								|| textFieldFieldTipoEleicao.getText().isEmpty()
@@ -1889,7 +1951,7 @@ public class Cadastrro extends JDialog {
 
 							if (dataInicio.before(dataAnterior) || dataInicio.after(dataFinal)
 									|| dataFinal.before(dataAtual)) {
-								JOptionPane.showMessageDialog(null, "As datas informadas são inválidas.");
+								JOptionPane.showMessageDialog(null, "As datas informadas sï¿½o invï¿½lidas.");
 							} else {
 								st = conn.prepareStatement(
 										"UPDATE eleicao SET nome = ?, tipo = ?, dataInicio = ?, dataFinal = ? WHERE id = ?");
@@ -1924,7 +1986,7 @@ public class Cadastrro extends JDialog {
 					}
 				}
 
-				else if (itemSelecionadoCombox.equals("Endereço")) {
+				else if (itemSelecionadoCombox.equals("Endereï¿½o")) {
 					try {
 						if (textFieldCidadeCrud.getText().isEmpty() || textFieldCepCrud.getText().isEmpty()
 								|| textFieldBairroCrud.getText().isEmpty()
@@ -2056,7 +2118,7 @@ public class Cadastrro extends JDialog {
 			}
 		});
 		contentPane.setLayout(null);
-		btnNewButton_3.setToolTipText("CRIAR ELEIÇÃO");
+		btnNewButton_3.setToolTipText("CRIAR ELEIï¿½ï¿½O");
 		btnNewButton_3.setIcon(new ImageIcon(Cadastrro.class.getResource("/view/images/eleicao.png")));
 
 		JLabel lblNewLabel_19 = new JLabel("Menu");
